@@ -1,3 +1,5 @@
+[![Build firmware](https://github.com/retrofun/mist-firmware/actions/workflows/test-build.yaml/badge.svg)](https://github.com/retrofun/mist-firmware/actions/workflows/test-build.yaml)
+
 MIST Firmware source code
 =========================
 
