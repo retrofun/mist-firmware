@@ -44,9 +44,9 @@ adfTYPE df[4];            // drive 0 information structure
 #define HEADER_SIZE 0x40
 #define DATA_SIZE 0x400
 #define SECTOR_SIZE (HEADER_SIZE + DATA_SIZE)
-#define SECTOR_COUNT 11
+#define SECTOR_COUNT (11 * (drive->dd_hd + 1))
 #define LAST_SECTOR (SECTOR_COUNT - 1)
-#define GAP_SIZE (TRACK_SIZE - SECTOR_COUNT * SECTOR_SIZE)
+#define GAP_SIZE (TRACK_SIZE - 11 * SECTOR_SIZE)
 
 // sends the data in the sector buffer to the FPGA, translated into an Amiga floppy format sector
 // note that we do not insert clock bits because they will be stripped by the Amiga software anyway
@@ -325,7 +325,7 @@ unsigned char FindSync(adfTYPE *drive)
     return 0;
 }
 
-unsigned char GetHeader(unsigned char *pTrack, unsigned char *pSector)
+unsigned char GetHeader(unsigned char *pTrack, unsigned char *pSector, unsigned char dd_hd)
 // this function reads data from fifo till it finds sync word or dma is inactive
 {
     unsigned char c, c1, c2, c3, c4;
@@ -402,9 +402,9 @@ unsigned char GetHeader(unsigned char *pTrack, unsigned char *pSector)
                 Error = 22;
             else if (c2 > 159) // Track number (0-159)
                 Error = 23;
-            else if (c3 > 10) // Sector number (0-10)
+            else if (c3 > (11 * (dd_hd + 1) - 1)) // Sector number (DD: 0-10, HD: 0-21)
                 Error = 24;
-            else if (c4 > 11 || c4 == 0) // Number of sectors to gap (1-11)
+            else if (c4 > (11 * (dd_hd + 1)) || c4 == 0) // Number of sectors to gap (DD: 1-11, HD: 1-22)
                 Error = 25;
 
             if (Error)
@@ -603,7 +603,7 @@ void WriteTrack(adfTYPE *drive)
 
     while (FindSync(drive))
     {
-        if (GetHeader(&Track, &Sector))
+        if (GetHeader(&Track, &Sector, drive->dd_hd))
         {
             if (Track == drive->track)
             {
@@ -642,8 +642,10 @@ void WriteTrack(adfTYPE *drive)
 void UpdateDriveStatus(void)
 {
     EnableFpgaMinimig();
-    SPI(0x10);
+    SPI(CMD_STATUS);
     SPI(df[0].status | (df[1].status << 1) | (df[2].status << 2) | (df[3].status << 3));
+    SPI(CMD_STATUS);
+    SPI(df[0].dd_hd | (df[1].dd_hd << 1) | (df[2].dd_hd << 2) | (df[3].dd_hd << 3));
     DisableFpga();
 }
 
