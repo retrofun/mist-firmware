@@ -999,10 +999,10 @@ unsigned char fpga_init(const char *name) {
     ChangeDirectoryName("/");
 
     //eject all disk
-    df[0].status = 0;
-    df[1].status = 0;
-    df[2].status = 0;
-    df[3].status = 0;
+    df[0].status = df[0].dd_hd = 0;
+    df[1].status = df[1].dd_hd = 0;
+    df[2].status = df[2].dd_hd = 0;
+    df[3].status = df[3].dd_hd = 0;
 
     config.kickstart[0]=0;
     SetConfigurationFilename(arc_get_cfg_file_n());

@@ -4,8 +4,11 @@
 #include "FatFs/ff.h"
 
 // floppy disk interface defs
+// from FPGA
 #define CMD_RDTRK 0x01
 #define CMD_WRTRK 0x02
+// to FPGA
+#define CMD_STATUS 0x10
 
 // floppy status
 #define DSK_INSERTED 0x01 /*disk is inserted*/
@@ -21,6 +24,7 @@ typedef struct
     unsigned char sector_offset; /*sector offset to handle tricky loaders*/
     unsigned char track; /*current track*/
     unsigned char track_prev; /*previous track*/
+    unsigned char dd_hd:1; /*DD 880KB/HD 1760KB*/
     char          name[22]; /*floppy name*/
 } adfTYPE;
 
@@ -29,7 +33,7 @@ void SectorHeaderToFpga(unsigned char n, unsigned char dsksynch, unsigned char d
 //unsigned short SectorToFpga(unsigned char sector, unsigned char track, unsigned char dsksynch, unsigned char dsksyncl);
 void ReadTrack(adfTYPE *drive);
 unsigned char FindSync(adfTYPE *drive);
-unsigned char GetHeader(unsigned char *pTrack, unsigned char *pSector);
+unsigned char GetHeader(unsigned char *pTrack, unsigned char *pSector, unsigned char dd_hd);
 unsigned char GetData(void);
 void WriteTrack(adfTYPE *drive);
 void UpdateDriveStatus(void);
