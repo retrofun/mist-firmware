@@ -634,7 +634,7 @@ unsigned char SaveConfiguration(char *filename)
 
 void EjectAllFloppies() {
   for(int i=0;i<drives;i++)
-    df[i].status = 0;
+    df[i].status = df[i].dd_hd = 0;
 
   // harddisk
   config.hardfile[0].present = 0;

@@ -93,8 +93,9 @@ static void InsertFloppy(adfTYPE *drive, const unsigned char *name)
 		if (f_open(&drive->file, name, FA_READ) != FR_OK)
 		return;
 	}
+	drive->dd_hd = f_size(&drive->file) > 512*11*MAX_TRACKS ? 1 : 0;
 	// calculate number of tracks in the ADF image file
-	tracks = f_size(&drive->file) / (512*11);
+	tracks = f_size(&drive->file) / (512*11*(drive->dd_hd + 1));
 	if (tracks > MAX_TRACKS) {
 		iprintf("UNSUPPORTED ADF SIZE!!! Too many tracks: %lu\r", tracks);
 		tracks = MAX_TRACKS;
@@ -122,6 +123,7 @@ static void InsertFloppy(adfTYPE *drive, const unsigned char *name)
 	iprintf("Inserting floppy: \"%s\"\r", name);
 	iprintf("file readonly: 0x%u\r", readonly);
 	iprintf("file size: %llu (%llu KB)\r", f_size(&drive->file), f_size(&drive->file) >> 10);
+	iprintf("floppy type: %s\r", drive->dd_hd ? "HD" : "DD");
 	iprintf("drive tracks: %u\r", drive->tracks);
 	iprintf("drive status: 0x%02X\r", drive->status);
 }
@@ -376,6 +378,8 @@ static char GetMenuItem_Minimig(uint8_t idx, char action, menu_item_t *item) {
 						item->stipple = 1;
 					} else {
 						strcpy(s, " dfx: ");
+						if (df[idx].dd_hd)
+							s[1] = 'h';
 						s[3] = idx + '0';
 						if (idx <= drives) {
 							if (df[idx].status & DSK_INSERTED) {// floppy disk is inserted
@@ -612,9 +616,9 @@ static char GetMenuItem_Minimig(uint8_t idx, char action, menu_item_t *item) {
 				case 2:
 				case 3:
 					if (df[idx].status & DSK_INSERTED) {// eject selected floppy
-						df[idx].status = 0;
+						df[idx].status = df[idx].dd_hd = 0;
 					} else {
-						df[idx].status = 0;
+						df[idx].status = df[idx].dd_hd = 0;
 						SelectFileNG("ADF", SCAN_DIR | SCAN_LFN, FloppyFileSelected, 0);
 					}
 					break;
@@ -869,7 +873,7 @@ static char GetMenuItem_Minimig(uint8_t idx, char action, menu_item_t *item) {
 		case MENU_ACT_BKSP:
 			if (page_idx == 0) { // eject all floppies
 				for (int i = 0; i <= drives; i++)
-					df[i].status = 0;
+					df[i].status = df[i].dd_hd = 0;
 			}
 			break;
 		case MENU_ACT_RIGHT:
