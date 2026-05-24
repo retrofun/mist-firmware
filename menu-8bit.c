@@ -31,6 +31,7 @@
 #include "cue_parser.h"
 #include "menu_info.h"
 #include "idx_files.h"
+#include "mist_cfg.h"
 
 extern char s[FF_LFN_BUF + 1];
 
@@ -512,8 +513,25 @@ static char GetMenuItem_8bit(uint8_t idx, char action, menu_item_t *item) {
 static char KeyEvent_8bit(uint8_t key) {
 	if (key == KEY_F1) {
 		menu_info_open(user_io_get_core_name());
+		return false;
 	}
-	return 0;
+	if (key == KEY_F5) {
+		// toggle video mode bit
+		mist_cfg.scandoubler_disable = !mist_cfg.scandoubler_disable;
+		user_io_send_buttons(1);
+		VIDEO_ALTERED_VAR |= 1;
+		VIDEO_SD_DISABLE_VAR = mist_cfg.scandoubler_disable;
+		return false;
+	}
+	if (key == KEY_F6) {
+		// toggle video mode bit
+		mist_cfg.ypbpr = !mist_cfg.ypbpr;
+		user_io_send_buttons(1);
+		VIDEO_ALTERED_VAR |= 2;
+		VIDEO_YPBPR_VAR = mist_cfg.ypbpr;
+		return false;
+	}
+	return false;
 }
 
 void Setup8bitMenu() {
