@@ -75,6 +75,7 @@ mist_cfg_t mist_cfg = {
 minimig_cfg_t minimig_cfg = {
   .kick1x_memory_detection_patch = 0,
   .clock_freq = 0,
+  .silent_boot = 0,
   .conf_name = {"Default","1","2","3","4"}
 };
 
@@ -129,6 +130,7 @@ const ini_var_t mist_ini_vars[] = {
   // [MINIMIG_CONFIG]
   {"KICK1X_MEMORY_DETECTION_PATCH", (void*)(&(minimig_cfg.kick1x_memory_detection_patch)), UINT8, 0, 1, 2},
   {"CLOCK_FREQ", (void*)(&(minimig_cfg.clock_freq)), UINT8, 0, 2, 2},
+  {"SILENT_BOOT", (void*)(&(minimig_cfg.silent_boot)), UINT8, 0, 1, 2},
   {"CONF_DEFAULT", (void*)(&(minimig_cfg.conf_name[0])), STRING, 1, 10, 2},
   {"CONF_1", (void*)(&(minimig_cfg.conf_name[1])), STRING, 1, 10, 2},
   {"CONF_2", (void*)(&(minimig_cfg.conf_name[2])), STRING, 1, 10, 2},

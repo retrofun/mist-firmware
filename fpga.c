@@ -960,14 +960,16 @@ unsigned char fpga_init(const char *name) {
     if(minimig_v2()) {
       user_io_8bit_set_status(minimig_cfg.clock_freq << 1, 0xffffffff);
       WaitTimer(100);
-      EnableOsd();
-      SPI(OSD_CMD_VERSION);
-      minimig_ver_beta   = SPI(0xff);
-      minimig_ver_major  = SPI(0xff);
-      minimig_ver_minor  = SPI(0xff);
-      minimig_ver_minion = SPI(0xff);
-      DisableOsd();
-      SPIN(); SPIN(); SPIN(); SPIN();
+      if (!minimig_cfg.silent_boot) {
+        EnableOsd();
+        SPI(OSD_CMD_VERSION);
+        minimig_ver_beta   = SPI(0xff);
+        minimig_ver_major  = SPI(0xff);
+        minimig_ver_minor  = SPI(0xff);
+        minimig_ver_minion = SPI(0xff);
+        DisableOsd();
+        SPIN(); SPIN(); SPIN(); SPIN();
+      }
       EnableOsd();
       SPI(OSD_CMD_RST);
       rstval = (SPI_RST_USR | SPI_RST_CPU | SPI_CPU_HLT);
@@ -980,20 +982,24 @@ unsigned char fpga_init(const char *name) {
       SPI(rstval);
       DisableOsd();
       SPIN(); SPIN(); SPIN(); SPIN();
-      WaitTimer(100);
-      BootInit();
-      WaitTimer(500);
-      char rtl_ver[45];
-      siprintf(rtl_ver, "**** MINIMIG-AGA%s v%d.%d.%d for MiST ****", minimig_ver_beta ? " BETA" : "", minimig_ver_major, minimig_ver_minor, minimig_ver_minion);
-      BootPrintEx(rtl_ver);
-      BootPrintEx(" ");
-      BootPrintEx("MINIMIG-AGA for MiST by Rok Krajnc (rok.krajnc@gmail.com)");
-      BootPrintEx("Original Minimig by Dennis van Weeren");
-      BootPrintEx("Updates by Jakub Bednarski, Tobias Gubener, Sascha Boing, A.M. Robinson & others");
-      BootPrintEx("MiST by Till Harbaum (till@harbaum.org)");
-      BootPrintEx("For updates & code see https://github.com/rkrajnc/minimig-mist");
-      BootPrintEx(" ");
-      WaitTimer(1000);
+      if (!minimig_cfg.silent_boot) {
+        char rtl_ver[45];
+
+        WaitTimer(100);
+        BootInit();
+        WaitTimer(500);
+
+        siprintf(rtl_ver, "**** MINIMIG-AGA%s v%d.%d.%d for MiST ****", minimig_ver_beta ? " BETA" : "", minimig_ver_major, minimig_ver_minor, minimig_ver_minion);
+        BootPrintEx(rtl_ver);
+        BootPrintEx(" ");
+        BootPrintEx("MINIMIG-AGA for MiST by Rok Krajnc (rok.krajnc@gmail.com)");
+        BootPrintEx("Original Minimig by Dennis van Weeren");
+        BootPrintEx("Updates by Jakub Bednarski, Tobias Gubener, Sascha Boing, A.M. Robinson & others");
+        BootPrintEx("MiST by Till Harbaum (till@harbaum.org)");
+        BootPrintEx("For updates & code see https://github.com/rkrajnc/minimig-mist");
+        BootPrintEx(" ");
+        WaitTimer(1000);
+      }
     }
 
     ChangeDirectoryName("/");
